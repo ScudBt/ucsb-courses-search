@@ -120,4 +120,28 @@ public class CourseController {
         return "redirect:/courseschedule";
     }
 
+    // @GetMapping("/courseschedule/{scheduleid}")
+    // public String index(Model model, OAuth2AuthenticationToken token) {
+        
+    //     logger.info("Inside /courseschedule controller method CourseController#index");
+    //     logger.info("model=" + model + " token=" + token);
+
+    //     if (token!=null) {
+    //         String uid = token.getPrincipal().getAttributes().get("id").toString();
+    //         logger.info("uid="+uid);
+    //         logger.info("courseRepository="+courseRepository);
+    //         List<Schedule> myschedules = scheduleRepository.findByUid(uid);// get all schedule ids by uid
+    //         // get courses by each scheduleid to a list
+    //         Schedule lastSchedule = myschedules.get(myschedules.size() -1);
+    //         Iterable<Course> myclasses = courseRepository.findByScheduleid(lastSchedule.getScheduleid());
+    //         // logger.info("there are " + myclasses.size() + " courses that match uid: " + uid);
+    //         model.addAttribute("myclasses", myclasses);
+    //         model.addAttribute("myschedules", myschedules);
+    //     } else {
+    //         ArrayList<Course> emptyList = new ArrayList<Course>();
+    //         model.addAttribute("myclasses", emptyList);
+    //     }
+    //     return "courseschedule/1";
+    // }
+
 }
