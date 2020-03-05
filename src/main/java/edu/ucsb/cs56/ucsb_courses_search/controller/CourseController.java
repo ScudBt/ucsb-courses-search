@@ -120,7 +120,7 @@ public class CourseController {
         return "redirect:/courseschedule";
     }
 
-    @GetMapping("courseschedule/1")
+    @GetMapping("courseschedule/{scheduleid}")
     public String view(Model model, OAuth2AuthenticationToken token) {
         
         logger.info("Inside /courseschedule controller method CourseController#view");
