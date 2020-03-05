@@ -7,7 +7,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
+import org.springframework.web.bind.annotation.RequestParam;
+//import org.springframework.web.bind.annotation.RequestParam;
 import edu.ucsb.cs56.ucsb_courses_search.entity.Course;
 import edu.ucsb.cs56.ucsb_courses_search.entity.Schedule;
 import edu.ucsb.cs56.ucsb_courses_search.repository.CourseRepository;
@@ -36,6 +37,10 @@ public class CourseController {
         this.scheduleRepository = scheduleRepository;
     }
 
+    public List<Schedule> getmyschedules(){
+        return myschedules;
+    }
+
     @GetMapping("/courseschedule")
     public String index(Model model, OAuth2AuthenticationToken token) {
         
@@ -48,7 +53,7 @@ public class CourseController {
             logger.info("courseRepository="+courseRepository);
             List<Schedule> myschedules = scheduleRepository.findByUid(uid);// get all schedule ids by uid
             // get courses by each scheduleid to a list
-            Schedule lastSchedule = myschedules.get(myschedules.size() -1);
+            Schedule lastSchedule = myschedules.get(myschedules.size() - 1);
             Iterable<Course> myclasses = courseRepository.findByScheduleid(lastSchedule.getScheduleid());
             // logger.info("there are " + myclasses.size() + " courses that match uid: " + uid);
             model.addAttribute("myclasses", myclasses);
@@ -66,6 +71,19 @@ public class CourseController {
         ) {
         course.setScheduleid(scheduleid);
         courseRepository.save(course);
+        return "redirect:/courseschedule";
+    }
+
+   @PostMapping("/courseschedule/create")
+    public String add_schedule(String sname, Model model, OAuth2AuthenticationToken token) {
+
+        Schedule newschedule = new Schedule();
+        String uid = token.getPrincipal().getAttributes().get("id").toString();
+        newschedule.setUid(uid);
+        newschedule.setSchedulename(sname);
+        scheduleRepository.save(newschedule);
+
+
         return "redirect:/courseschedule";
     }
 
