@@ -18,6 +18,7 @@ import edu.ucsb.cs56.ucsb_courses_search.service.MembershipService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import edu.ucsb.cs56.ucsb_courses_search.entity.Schedule;
 import edu.ucsb.cs56.ucsb_courses_search.repository.ScheduleRepository;
+import edu.ucsb.cs56.ucsb_courses_search.formbeans.ScheduleSearch;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ public class CourseController {
     }
 
     @GetMapping("/courseschedule")
-    public String index(Model model, OAuth2AuthenticationToken token) throws AccessForbiddenException {
+    public String index(Model model, OAuth2AuthenticationToken token, ScheduleSearch scheduleSearch) throws AccessForbiddenException {
         
         logger.info("Inside /courseschedule controller method CourseController#index");
         logger.info("model=" + model + " token=" + token);
@@ -74,6 +75,7 @@ public class CourseController {
 	    //org.springframework.security.access.AccessDeniedException("403 returned");
 	    throw new AccessForbiddenException();
         }
+        model.addAttribute("scheduleSearch", scheduleSearch);
         return "courseschedule/index";
     }
 
@@ -120,8 +122,8 @@ public class CourseController {
         return "redirect:/courseschedule";
     }
 
-    @GetMapping("/courseschedule/{scheduleid}")
-    public String viewSchedule(Model model, OAuth2AuthenticationToken token) {
+    @GetMapping("/courseschedule/viewSchedule")
+    public String viewSchedule(Model model, OAuth2AuthenticationToken token, ScheduleSearch scheduleSearch) {
         
         logger.info("Inside /courseschedule controller method CourseController#viewSchedule");
         logger.info("model=" + model + " token=" + token);
@@ -129,18 +131,20 @@ public class CourseController {
         if (token!=null) {
             String uid = token.getPrincipal().getAttributes().get("sub").toString();
             logger.info("uid="+uid);
-            logger.info("courseRepository="+courseRepository);
+            logger.info("scheduleItemRepository="+scheduleItemRepository);
             List<Schedule> myschedules = scheduleRepository.findByUid(uid);// get all schedule ids by uid
             // get courses by each scheduleid to a list
             Schedule lastSchedule = myschedules.get(myschedules.size() -1);
-            Iterable<Course> myclasses = courseRepository.findByScheduleid(lastSchedule.getScheduleid());
+            Iterable<ScheduleItem> myclasses = scheduleItemRepository.findByScheduleid(lastSchedule.getScheduleid());
             // logger.info("there are " + myclasses.size() + " courses that match uid: " + uid);
             model.addAttribute("myclasses", myclasses);
             model.addAttribute("myschedules", myschedules);
         } else {
-            ArrayList<Course> emptyList = new ArrayList<Course>();
+            ArrayList<ScheduleItem> emptyList = new ArrayList<ScheduleItem>();
             model.addAttribute("myclasses", emptyList);
         }
+
+        model.addAttribute("scheduleSearch", scheduleSearch);
         return "courseschedule/viewSchedule";
     }
 
