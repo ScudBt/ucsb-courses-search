@@ -14,6 +14,7 @@ import edu.ucsb.cs56.ucsb_courses_search.entity.Schedule;
 import edu.ucsb.cs56.ucsb_courses_search.repository.CourseRepository;
 import edu.ucsb.cs56.ucsb_courses_search.repository.ScheduleRepository;
 
+import edu.ucsb.cs56.ucsb_courses_search.service.QuarterListService;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,13 +33,12 @@ public class CourseController {
     private ScheduleRepository scheduleRepository;
 
     @Autowired
+    private QuarterListService quarterListService;
+
+    @Autowired
     public CourseController(CourseRepository courseRepository, ScheduleRepository scheduleRepository) {
         this.courseRepository = courseRepository;
         this.scheduleRepository = scheduleRepository;
-    }
-
-    public List<Schedule> getmyschedules(){
-        return myschedules;
     }
 
     @GetMapping("/courseschedule")
@@ -58,6 +58,7 @@ public class CourseController {
             // logger.info("there are " + myclasses.size() + " courses that match uid: " + uid);
             model.addAttribute("myclasses", myclasses);
             model.addAttribute("myschedules", myschedules);
+            model.addAttribute("quarters", quarterListService.getQuarters());
         } else {
             ArrayList<Course> emptyList = new ArrayList<Course>();
             model.addAttribute("myclasses", emptyList);
@@ -75,15 +76,15 @@ public class CourseController {
     }
 
    @PostMapping("/courseschedule/create")
-    public String add_schedule(String sname, Model model, OAuth2AuthenticationToken token) {
-
-        Schedule newschedule = new Schedule();
-        String uid = token.getPrincipal().getAttributes().get("id").toString();
-        newschedule.setUid(uid);
-        newschedule.setSchedulename(sname);
-        scheduleRepository.save(newschedule);
-
-
+    public String add_schedule(String sname, Model model, String quarter, OAuth2AuthenticationToken token) {
+        if (token!=null){
+            Schedule newschedule = new Schedule();
+            String uid = token.getPrincipal().getAttributes().get("sub").toString();
+            newschedule.setUid(uid);
+            newschedule.setSchedulename(sname);
+            newschedule.setQuarter(quarter);
+            scheduleRepository.save(newschedule); 
+        }
         return "redirect:/courseschedule";
     }
 
