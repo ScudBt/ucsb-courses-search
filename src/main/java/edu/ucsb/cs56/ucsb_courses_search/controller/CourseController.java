@@ -120,14 +120,14 @@ public class CourseController {
         return "redirect:/courseschedule";
     }
 
-    @GetMapping("courseschedule/{scheduleid}")
-    public String view(Model model, OAuth2AuthenticationToken token) {
+    @GetMapping("/courseschedule/{scheduleid}")
+    public String viewSchedule(Model model, OAuth2AuthenticationToken token) {
         
-        logger.info("Inside /courseschedule controller method CourseController#view");
+        logger.info("Inside /courseschedule controller method CourseController#viewSchedule");
         logger.info("model=" + model + " token=" + token);
 
         if (token!=null) {
-            String uid = token.getPrincipal().getAttributes().get("id").toString();
+            String uid = token.getPrincipal().getAttributes().get("sub").toString();
             logger.info("uid="+uid);
             logger.info("courseRepository="+courseRepository);
             List<Schedule> myschedules = scheduleRepository.findByUid(uid);// get all schedule ids by uid
