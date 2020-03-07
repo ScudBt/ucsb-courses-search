@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-//import org.springframework.web.bind.annotation.RequestParam;
-import edu.ucsb.cs56.ucsb_courses_search.entity.Course;
-import edu.ucsb.cs56.ucsb_courses_search.entity.Schedule;
-import edu.ucsb.cs56.ucsb_courses_search.repository.CourseRepository;
-import edu.ucsb.cs56.ucsb_courses_search.repository.ScheduleRepository;
 
+import edu.ucsb.cs56.ucsb_courses_search.entity.ScheduleItem;
+import edu.ucsb.cs56.ucsb_courses_search.entity.Schedule;
+import edu.ucsb.cs56.ucsb_courses_search.repository.ScheduleItemRepository;
+import edu.ucsb.cs56.ucsb_courses_search.repository.ScheduleRepository;
 import edu.ucsb.cs56.ucsb_courses_search.service.QuarterListService;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,17 +27,17 @@ public class CourseController {
     private Logger logger = LoggerFactory.getLogger(CourseController.class);
 
     @Autowired
-    private CourseRepository courseRepository;
+    private ScheduleItemRepository scheduleItemRepository;
 
     @Autowired
     private ScheduleRepository scheduleRepository;
 
-    @Autowired
-    private QuarterListService quarterListService;
+    // @Autowired
+    // private QuarterListService quarterListService;
 
     @Autowired
-    public CourseController(CourseRepository courseRepository, ScheduleRepository scheduleRepository) {
-        this.courseRepository = courseRepository;
+    public CourseController(ScheduleItemRepository scheduleItemRepository, ScheduleRepository scheduleRepository) {
+        this.scheduleItemRepository = scheduleItemRepository;
         this.scheduleRepository = scheduleRepository;
     }
 
@@ -50,39 +50,36 @@ public class CourseController {
         if (token!=null) {
             String uid = token.getPrincipal().getAttributes().get("sub").toString();
             logger.info("uid="+uid);
-            logger.info("courseRepository="+courseRepository);
+            logger.info("scheduleItemRepository="+scheduleItemRepository);
             List<Schedule> myschedules = scheduleRepository.findByUid(uid);// get all schedule ids by uid
             // get courses by each scheduleid to a list
             Schedule lastSchedule = myschedules.get(myschedules.size() - 1);
-            Iterable<Course> myclasses = courseRepository.findByScheduleid(lastSchedule.getScheduleid());
+            Iterable<ScheduleItem> myclasses = scheduleItemRepository.findByScheduleid(lastSchedule.getScheduleid());
             // logger.info("there are " + myclasses.size() + " courses that match uid: " + uid);
             model.addAttribute("myclasses", myclasses);
             model.addAttribute("myschedules", myschedules);
-            model.addAttribute("quarters", quarterListService.getQuarters());
+            //model.addAttribute("quarters", quarterListService.getQuarters());
         } else {
-            ArrayList<Course> emptyList = new ArrayList<Course>();
+            ArrayList<ScheduleItem> emptyList = new ArrayList<ScheduleItem>();
             model.addAttribute("myclasses", emptyList);
         }
         return "courseschedule/index";
     }
     @PostMapping("/courseschedule/add/{scheduleid}")
-    public String add(
-        @PathVariable("scheduleid") long scheduleid, 
-        Course course, Model model
-        ) {
-        course.setScheduleid(scheduleid);
-        courseRepository.save(course);
+    public String add(@PathVariable("scheduleid") long scheduleid, ScheduleItem scheduleItem, Model model) {
+        scheduleItem.setScheduleid(scheduleid);
+        scheduleItemRepository.save(scheduleItem);
         return "redirect:/courseschedule";
     }
 
    @PostMapping("/courseschedule/create")
-    public String add_schedule(String sname, Model model, String quarter, OAuth2AuthenticationToken token) {
+    public String add_schedule(String sname, Model model, OAuth2AuthenticationToken token) {
         if (token!=null){
             Schedule newschedule = new Schedule();
             String uid = token.getPrincipal().getAttributes().get("sub").toString();
             newschedule.setUid(uid);
             newschedule.setSchedulename(sname);
-            newschedule.setQuarter(quarter);
+            //newschedule.setQuarter(quarter);
             scheduleRepository.save(newschedule); 
         }
         return "redirect:/courseschedule";
